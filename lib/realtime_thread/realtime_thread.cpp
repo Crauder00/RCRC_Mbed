@@ -35,14 +35,22 @@ void realtime_thread::loop(void)
         time = 1e-6f * (float)(duration_cast<microseconds>(m_Timer.elapsed_time()).count());
         // --------------------- THE LOOP ---------------------
 
-        u = myDataLogger.get_set_value(time); // get set values from the GUI
+        w = myDataLogger.get_set_value(time); // get set values from the GUI
 
         y1 = m_IO_handler->read_ain1(); // read 1st voltage
         y2 = m_IO_handler->read_ain2(); // read 2nd voltage
 
+        //Regler
+        float error = exc + w - y2; // calculate error exc or w is always 0
+        float Kp = 4.0; // proportional gain
+        u = saturate(Kp * error, -1.0f, 1.0f); // calculate control signal
+
         m_IO_handler->write_aout(u); // write to analog output
 
-        myDataLogger.write_to_log(time, u, y1, y2, 0.0f, 0.0f, 0.0f);
+        myDataLogger.write_to_log(time, w, y1, y2, u, error, 0.0f);
+
+        // m_IO_handler->write_aout(exc); // write excitation to analog output
+        exc = myGPA.update(exc, y2); // update the GPA with the current excitation and the measured output
     }
 }
 

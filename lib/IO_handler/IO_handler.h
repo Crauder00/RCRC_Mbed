@@ -23,4 +23,7 @@ private:
     AnalogIn m_a_in2;
     DigitalOut m_d_out;
     float m_set_value;
+
+    //Aufgabe
+    LinearCharacteristics m_lc_out, m_lc_in;
 };
